@@ -1,115 +1,116 @@
-// script.js
+document.addEventListener("DOMContentLoaded", () => {
+  const unitTypeSelect = document.getElementById("unit-type");
+  const inputValue = document.getElementById("input-value");
+  const fromUnitSelect = document.getElementById("from-unit");
+  const toUnitSelect = document.getElementById("to-unit");
+  const resultDisplay = document.getElementById("result");
+  const themeToggle = document.getElementById("theme-toggle");
+  const historyList = document.getElementById("history"); // 👈 NEW
 
-const unitTypeSelect = document.getElementById('unit-type');
-const fromUnitSelect = document.getElementById('from-unit');
-const toUnitSelect = document.getElementById('to-unit');
-const inputValue = document.getElementById('input-value');
-const resultDisplay = document.getElementById('result');
-const convertBtn = document.getElementById('convert-btn');
+  const units = {
+    length: ['millimeter', 'centimeter', 'meter', 'kilometer', 'foot', 'mile'],
+    weight: ['gram', 'kilogram', 'pound', 'ounce'],
+    temperature: ['celsius', 'fahrenheit', 'kelvin']
+  };
 
-const units = {
-  length: ['meter', 'kilometer', 'mile', 'foot'],
-  weight: ['gram', 'kilogram', 'pound', 'ounce'],
-  temperature: ['celsius', 'fahrenheit', 'kelvin']
-};
+  function populateUnits(type) {
+    fromUnitSelect.innerHTML = "";
+    toUnitSelect.innerHTML = "";
+    units[type].forEach(unit => {
+      fromUnitSelect.add(new Option(unit, unit));
+      toUnitSelect.add(new Option(unit, unit));
+    });
+  }
 
-// Populate dropdowns based on unit type
-function populateUnitOptions(type) {
-  const options = units[type];
-  fromUnitSelect.innerHTML = '';
-  toUnitSelect.innerHTML = '';
-  options.forEach(unit => {
-    const option1 = document.createElement('option');
-    option1.value = unit;
-    option1.textContent = unit;
+  function addToHistory(entry) {
+    const li = document.createElement("li");
+    li.textContent = entry;
+    historyList.prepend(li); // 👈 Adds newest entry on top
+  }
 
-    const option2 = option1.cloneNode(true);
+  function convert() {
+    const type = unitTypeSelect.value;
+    const value = parseFloat(inputValue.value);
+    const from = fromUnitSelect.value;
+    const to = toUnitSelect.value;
 
-    fromUnitSelect.appendChild(option1);
-    toUnitSelect.appendChild(option2);
+    if (isNaN(value)) {
+      resultDisplay.textContent = "";
+      return;
+    }
+
+    let result = value;
+
+    if (type === "length") {
+      const toMeters = {
+        millimeter: 0.001,
+        centimeter: 0.01,
+        meter: 1,
+        kilometer: 1000,
+        foot: 0.3048,
+        mile: 1609.34
+      };
+      result = value * toMeters[from] / toMeters[to];
+    }
+
+    else if (type === "weight") {
+      const toGrams = {
+        gram: 1,
+        kilogram: 1000,
+        pound: 453.592,
+        ounce: 28.3495
+      };
+      result = value * toGrams[from] / toGrams[to];
+    }
+
+    else if (type === "temperature") {
+      if (from === to) {
+        result = value;
+      } else {
+        let celsius;
+        if (from === "celsius") celsius = value;
+        else if (from === "fahrenheit") celsius = (value - 32) * 5 / 9;
+        else if (from === "kelvin") celsius = value - 273.15;
+
+        if (to === "celsius") result = celsius;
+        else if (to === "fahrenheit") result = (celsius * 9 / 5) + 32;
+        else if (to === "kelvin") result = celsius + 273.15;
+      }
+    }
+
+    const formattedResult = result.toFixed(2);
+    const resultText = `Result: ${formattedResult} ${to}`;
+    resultDisplay.textContent = resultText;
+
+    // ✅ Add to history
+    const historyEntry = `${value} ${from} → ${formattedResult} ${to}`;
+    addToHistory(historyEntry);
+  }
+  
+  // Initialize
+  populateUnits(unitTypeSelect.value);
+  convert();
+
+  // Live conversion
+  unitTypeSelect.addEventListener("change", () => {
+    populateUnits(unitTypeSelect.value);
+    convert();
   });
-}
+  inputValue.addEventListener("input", convert);
+  fromUnitSelect.addEventListener("change", convert);
+  toUnitSelect.addEventListener("change", convert);
 
-// Handle unit type change
-unitTypeSelect.addEventListener('change', () => {
-  populateUnitOptions(unitTypeSelect.value);
+  // Dark mode toggle
+  themeToggle.addEventListener("change", () => {
+    document.body.classList.toggle("dark");
+  });
 });
-
-// Initial population
-populateUnitOptions(unitTypeSelect.value);
-
-// Handle conversion
-convertBtn.addEventListener('click', () => {
-  const type = unitTypeSelect.value;
-  const from = fromUnitSelect.value;
-  const to = toUnitSelect.value;
-  const value = parseFloat(inputValue.value);
-
-  if (isNaN(value)) {
-    resultDisplay.textContent = "Please enter a valid number.";
-    return;
-  }
-
-  const result = convert(type, from, to, value);
-  resultDisplay.textContent = `Result: ${result} ${to}`;
+function clearFields() {
+  document.getElementById("input-value").value = "";
+  document.getElementById("result").textContent = "";
+  document.getElementById("clear-history").addEventListener("click", () => {
+  historyList.innerHTML = ""; // Clears all history items
 });
-
-// Conversion logic
-function convert(type, from, to, value) {
-  if (type === 'length') {
-    const conversions = {
-      meter: 1,
-      kilometer: 1000,
-      mile: 1609.34,
-      foot: 0.3048
-    };
-    return (value * conversions[from] / conversions[to]).toFixed(4);
-  }
-
-  if (type === 'weight') {
-    const conversions = {
-      gram: 1,
-      kilogram: 1000,
-      pound: 453.592,
-      ounce: 28.3495
-    };
-    return (value * conversions[from] / conversions[to]).toFixed(4);
-  }
-
-  if (type === 'temperature') {
-    return convertTemperature(from, to, value).toFixed(2);
-  }
-
-  return value;
 }
 
-// Temperature-specific conversions
-function convertTemperature(from, to, value) {
-  if (from === to) return value;
 
-  let celsius;
-
-  // Convert to Celsius
-  switch (from) {
-    case 'fahrenheit':
-      celsius = (value - 32) * 5 / 9;
-      break;
-    case 'kelvin':
-      celsius = value - 273.15;
-      break;
-    case 'celsius':
-    default:
-      celsius = value;
-  }
-
-  // Convert from Celsius to target
-  switch (to) {
-    case 'fahrenheit':
-      return (celsius * 9 / 5) + 32;
-    case 'kelvin':
-      return celsius + 273.15;
-    case 'celsius':
-    default:
-      return celsius;
-  }
-}
