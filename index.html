@@ -1,15 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Unit Converter</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <header>
+  <div class="header-content">
+    <img src="logo.png" alt="Logo" class="logo"> <!-- 👈 New Logo -->
     <h1>Unit Converter</h1>
-  </header>
+    <div class="theme-toggle-container">
+      <label class="theme-switch">
+        <input type="checkbox" id="theme-toggle">
+        <span class="slider"></span>
+        <span class="label-text">Dark Mode</span>
+      </label>
+    </div>
+  </div>
+</header>
+
+
   <main>
     <section>
       <label for="unit-type">Select Unit Type:</label>
@@ -19,25 +31,30 @@
         <option value="temperature">Temperature</option>
       </select>
     </section>
+
     <section>
       <label for="input-value">Enter Value:</label>
       <input type="number" id="input-value">
     </section>
+
     <section>
       <label for="from-unit">From:</label>
-      <select id="from-unit">
-        <!-- Options will be populated based on unit type -->
-      </select>
+      <select id="from-unit"></select>
     </section>
+
     <section>
       <label for="to-unit">To:</label>
-      <select id="to-unit">
-        <!-- Options will be populated based on unit type -->
-      </select>
+      <select id="to-unit"></select>
     </section>
-    <button id="convert-btn">Convert</button>
+
     <p id="result"></p>
+    <h2>History</h2>
+<ul id="history"></ul>
+
   </main>
+<button onclick="clearFields()">Clear</button>
+
   <script src="script.js"></script>
 </body>
 </html>
+
